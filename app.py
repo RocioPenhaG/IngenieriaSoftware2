@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, session, url_for
 import sqlite3
 
 app = Flask(__name__)
-app.secret_key = 'tu_clave_secreta'
+app.secret_key = 'is2_proyecto'
 
 def get_db_connection():
     conn = sqlite3.connect('usuarios.db')

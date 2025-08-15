@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestión de Empleados</title>
+</head>
+<body>
+    <h1>Empleados</h1>
+    <a href="{{ url_for('crear_empleado') }}">➕ Nuevo empleado</a>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Cargo</th>
+            <th>Salario</th>
+            <th>Acciones</th>
+        </tr>
+        {% for e in empleados %}
+        <tr>
+            <td>{{ e['id'] }}</td>
+            <td>{{ e['nombre'] }}</td>
+            <td>{{ e['cedula'] }}</td>
+            <td>{{ e['cargo'] }}</td>
+            <td>{{ e['salario_base'] }}</td>
+            <td>
+                <a href="{{ url_for('editar_empleado', id=e['id']) }}">✏️ Editar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <br>
+    <a href="{{ url_for('admin') }}">⬅️ Volver</a>
+</body>
+</html>

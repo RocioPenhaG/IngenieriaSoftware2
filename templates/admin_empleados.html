@@ -23,7 +23,9 @@
             <td>{{ e['cargo'] }}</td>
             <td>{{ e['salario_base'] }}</td>
             <td>
-                <a href="{{ url_for('editar_empleado', id=e['id']) }}">✏️ Editar</a>
+                <a href="{{ url_for('editar_empleado', id=e['id']) }}">✏️ Editar</a> |
+                <a href="{{ url_for('eliminar_empleado', id=e['id']) }}" 
+                   onclick="return confirm('¿Seguro que deseas eliminar este empleado?');">🗑️ Eliminar</a>
             </td>
         </tr>
         {% endfor %}

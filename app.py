@@ -144,6 +144,16 @@ def editar_empleado(id):
     conn.close()
     return render_template('admin_empleados_form.html', empleado=empleado)
 
+@app.route('/admin/empleados/eliminar/<int:id>')
+@login_required
+@role_required('admin')
+def eliminar_empleado(id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM empleados WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('listar_empleados'))
+
 # -----------------------
 # Otros roles
 # -----------------------

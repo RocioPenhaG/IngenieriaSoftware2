@@ -4,6 +4,7 @@ Sistema de pagos de salarios
 
 Login con roles
 Usuario			        Contraseña	    Rol
-admin@ingesoft.com	    admin123	    admin
-gerente@ingesoft.com	gerente123	    gerente
-empleado@ingesoft.com	empleado123	    empleado
+admin@example.com	    1234    	    admin
+gerente@example.com	    1234    	    gerente
+empleado@example.com   	1234    	    empleado
+asistenteexample.com    1234            asistente recursos humanos

@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
 usuarios = [
     ("admin@example.com", "1234", "admin"),
     ("gerente@example.com", "1234", "gerente"),
-    ("empleado@example.com", "1234", "empleado")
+    ("empleado@example.com", "1234", "empleado"),
+    ("asistente@example.com", "1234", "asistente")
 ]
 
 # Insertar datos

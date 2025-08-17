@@ -98,12 +98,15 @@ def crear_empleado():
         cargo = request.form['cargo']
         salario_base = request.form['salario_base']
         fecha_ingreso = request.form['fecha_ingreso']
+        hijos = request.form['hijos']
+        ips = request.form['ips']
 
         conn = get_db_connection()
         conn.execute("""
-            INSERT INTO empleados (nombre, cedula, fecha_nacimiento, estado_civil, cargo, salario_base, fecha_ingreso)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (nombre, cedula, fecha_nacimiento, estado_civil, cargo, salario_base, fecha_ingreso))
+            INSERT INTO empleados 
+            (nombre, cedula, fecha_nacimiento, estado_civil, cargo, salario_base, fecha_ingreso, hijos, ips)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (nombre, cedula, fecha_nacimiento, estado_civil, cargo, salario_base, fecha_ingreso, hijos, ips))
         conn.commit()
         conn.close()
 
@@ -130,12 +133,14 @@ def editar_empleado(id):
         cargo = request.form['cargo']
         salario_base = request.form['salario_base']
         fecha_ingreso = request.form['fecha_ingreso']
+        hijos = request.form['hijos']
+        ips = request.form['ips']
 
         conn.execute("""
             UPDATE empleados
-            SET nombre = ?, cedula = ?, fecha_nacimiento = ?, estado_civil = ?, cargo = ?, salario_base = ?, fecha_ingreso = ?
-            WHERE id = ?
-        """, (nombre, cedula, fecha_nacimiento, estado_civil, cargo, salario_base, fecha_ingreso, id))
+            SET nombre=?, cedula=?, fecha_nacimiento=?, estado_civil=?, cargo=?, salario_base=?, fecha_ingreso=?, hijos=?, ips=?
+            WHERE id=?
+        """, (nombre, cedula, fecha_nacimiento, estado_civil, cargo, salario_base, fecha_ingreso, hijos, ips, id))
         conn.commit()
         conn.close()
 

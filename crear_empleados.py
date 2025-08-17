@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect('usuarios.db')  # usa la misma base que tu app
+conn = sqlite3.connect('usuarios.db')
 cursor = conn.cursor()
 
 cursor.execute("""
@@ -12,11 +12,13 @@ CREATE TABLE IF NOT EXISTS empleados (
     estado_civil TEXT NOT NULL,
     cargo TEXT NOT NULL,
     salario_base REAL NOT NULL,
-    fecha_ingreso TEXT NOT NULL
+    fecha_ingreso TEXT NOT NULL,
+    hijos INTEGER DEFAULT 0,
+    ips TEXT
 )
 """)
 
 conn.commit()
 conn.close()
 
-print("Tabla 'empleados' creada correctamente.")
+print("Tabla 'empleados' creada o actualizada correctamente.")

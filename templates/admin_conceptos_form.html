@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ "Editar" if concepto else "Nuevo" }} Concepto Salarial</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+  <h1>{{ "Editar" if concepto else "Nuevo" }} Concepto Salarial</h1>
+  <form method="POST">
+    <div class="mb-3">
+      <label>Nombre</label>
+      <input type="text" name="nombre" class="form-control" value="{{ concepto['nombre'] if concepto else '' }}" required>
+    </div>
+    <div class="mb-3">
+      <label>Tipo</label>
+      <select name="tipo" class="form-control" required>
+        <option value="ingreso" {% if concepto and concepto['tipo']=="ingreso" %}selected{% endif %}>Ingreso</option>
+        <option value="descuento" {% if concepto and concepto['tipo']=="descuento" %}selected{% endif %}>Descuento</option>
+      </select>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" name="recurrente" class="form-check-input" {% if concepto and concepto['recurrente'] %}checked{% endif %}>
+      <label class="form-check-label">Recurrente</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" name="afecta_ips" class="form-check-input" {% if concepto and concepto['afecta_ips'] %}checked{% endif %}>
+      <label class="form-check-label">Afecta IPS</label>
+    </div>
+    <div class="form-check">
+      <input type="checkbox" name="afecta_aguinaldo" class="form-check-input" {% if concepto and concepto['afecta_aguinaldo'] %}checked{% endif %}>
+      <label class="form-check-label">Afecta Aguinaldo</label>
+    </div>
+    <div class="mb-3">
+      <label>Monto fijo (Gs)</label>
+      <input type="number" step="0.01" name="monto_fijo" class="form-control" value="{{ concepto['monto_fijo'] if concepto else '' }}">
+    </div>
+    <div class="mb-3">
+      <label>Porcentaje (%)</label>
+      <input type="number" step="0.01" name="porcentaje" class="form-control" value="{{ concepto['porcentaje'] if concepto else '' }}">
+    </div>
+    <button type="submit" class="btn btn-success">Guardar</button>
+    <a href="{{ url_for('listar_conceptos') }}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</body>
+</html>

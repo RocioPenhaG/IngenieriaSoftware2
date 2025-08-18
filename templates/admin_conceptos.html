@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Conceptos Salariales</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-4">
+  <h1>Conceptos Salariales</h1>
+
+  <div class="d-flex justify-content-between mb-3">
+    <a href="{{ url_for('crear_concepto') }}" class="btn btn-primary">➕ Nuevo Concepto</a>
+    <a href="{{ url_for('admin') }}" class="btn btn-secondary">⬅️ Volver</a>
+  </div>
+
+  <table class="table table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Recurrente</th>
+        <th>Afecta IPS</th>
+        <th>Afecta Aguinaldo</th>
+        <th>Monto fijo</th>
+        <th>Porcentaje</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in conceptos %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.nombre }}</td>
+        <td>{{ c.tipo }}</td>
+        <td>{{ "Sí" if c.recurrente else "No" }}</td>
+        <td>{{ "Sí" if c.afecta_ips else "No" }}</td>
+        <td>{{ "Sí" if c.afecta_aguinaldo else "No" }}</td>
+        <td>{{ c.monto_fijo or "-" }}</td>
+        <td>{{ c.porcentaje or "-" }}</td>
+        <td>
+          <a href="{{ url_for('editar_concepto', id=c.id) }}" class="btn btn-sm btn-warning">Editar</a>
+          <a href="{{ url_for('eliminar_concepto', id=c.id) }}" class="btn btn-sm btn-danger">Eliminar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

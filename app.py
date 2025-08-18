@@ -160,6 +160,176 @@ def eliminar_empleado(id):
     return redirect(url_for('listar_empleados'))
 
 # -----------------------
+# Conceptos Salariales
+# -----------------------
+@app.route('/admin/conceptos')
+@login_required
+@role_required('admin')
+def listar_conceptos():
+    conn = get_db_connection()
+    conceptos = conn.execute('SELECT * FROM conceptos_salariales').fetchall()
+    conn.close()
+    return render_template('admin_conceptos.html', conceptos=conceptos)
+
+@app.route('/admin/conceptos/nuevo', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def crear_concepto():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        tipo = request.form['tipo']
+        recurrente = 1 if 'recurrente' in request.form else 0
+        afecta_ips = 1 if 'afecta_ips' in request.form else 0
+        afecta_aguinaldo = 1 if 'afecta_aguinaldo' in request.form else 0
+        monto_fijo = request.form.get('monto_fijo') or None
+        porcentaje = request.form.get('porcentaje') or None
+
+        conn = get_db_connection()
+        conn.execute("""
+            INSERT INTO conceptos_salariales
+            (nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo, monto_fijo, porcentaje)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo, monto_fijo, porcentaje))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('listar_conceptos'))
+
+    return render_template('admin_conceptos_form.html', concepto=None)
+
+@app.route('/admin/conceptos/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def editar_concepto(id):
+    conn = get_db_connection()
+    concepto = conn.execute('SELECT * FROM conceptos_salariales WHERE id = ?', (id,)).fetchone()
+
+    if not concepto:
+        conn.close()
+        return "Concepto no encontrado", 404
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        tipo = request.form['tipo']
+        recurrente = 1 if 'recurrente' in request.form else 0
+        afecta_ips = 1 if 'afecta_ips' in request.form else 0
+        afecta_aguinaldo = 1 if 'afecta_aguinaldo' in request.form else 0
+        monto_fijo = request.form.get('monto_fijo') or None
+        porcentaje = request.form.get('porcentaje') or None
+
+        conn.execute("""
+            UPDATE conceptos_salariales
+            SET nombre=?, tipo=?, recurrente=?, afecta_ips=?, afecta_aguinaldo=?, monto_fijo=?, porcentaje=?
+            WHERE id=?
+        """, (nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo, monto_fijo, porcentaje, id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('listar_conceptos'))
+
+    conn.close()
+    return render_template('admin_conceptos_form.html', concepto=concepto)
+
+@app.route('/admin/conceptos/eliminar/<int:id>')
+@login_required
+@role_required('admin')
+def eliminar_concepto(id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM conceptos_salariales WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('listar_conceptos'))
+
+
+# -----------------------
+# Conceptos puntuales por empleado
+# -----------------------
+@app.route('/admin/conceptos_empleado/<int:empleado_id>')
+@login_required
+@role_required('admin')
+def listar_conceptos_empleado(empleado_id):
+    conn = get_db_connection()
+    empleado = conn.execute('SELECT * FROM empleados WHERE id=?', (empleado_id,)).fetchone()
+    conceptos = conn.execute("""
+        SELECT ce.id, cs.nombre, cs.tipo, ce.monto_fijo, ce.porcentaje, ce.fecha_aplicacion
+        FROM conceptos_empleado ce
+        JOIN conceptos_salariales cs ON ce.concepto_id = cs.id
+        WHERE ce.empleado_id=?
+    """, (empleado_id,)).fetchall()
+    conn.close()
+    return render_template('admin_conceptos_empleado.html', empleado=empleado, conceptos=conceptos)
+
+
+@app.route('/admin/conceptos_empleado/nuevo/<int:empleado_id>', methods=['GET','POST'])
+@login_required
+@role_required('admin')
+def crear_concepto_empleado(empleado_id):
+    conn = get_db_connection()
+    empleado = conn.execute('SELECT * FROM empleados WHERE id=?', (empleado_id,)).fetchone()
+    conceptos = conn.execute('SELECT * FROM conceptos_salariales').fetchall()
+    
+    if request.method == 'POST':
+        concepto_id = request.form['concepto_id']
+        monto_fijo = request.form.get('monto_fijo') or None
+        porcentaje = request.form.get('porcentaje') or None
+        fecha_aplicacion = request.form['fecha_aplicacion']
+        
+        conn.execute("""
+            INSERT INTO conceptos_empleado (empleado_id, concepto_id, monto_fijo, porcentaje, fecha_aplicacion, recurrente)
+            VALUES (?, ?, ?, ?, ?, 0)
+        """, (empleado_id, concepto_id, monto_fijo, porcentaje, fecha_aplicacion))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('listar_conceptos_empleado', empleado_id=empleado_id))
+    
+    conn.close()
+    return render_template('admin_conceptos_empleado_form.html', empleado=empleado, conceptos=conceptos)
+
+
+@app.route('/admin/conceptos_empleado/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def editar_concepto_empleado(id):
+    conn = get_db_connection()
+    concepto = conn.execute('SELECT * FROM conceptos_empleado WHERE id = ?', (id,)).fetchone()
+    if not concepto:
+        conn.close()
+        return "Concepto no encontrado", 404
+
+    empleado = conn.execute('SELECT * FROM empleados WHERE id = ?', (concepto['empleado_id'],)).fetchone()
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        tipo = request.form['tipo']
+        monto_fijo = request.form.get('monto_fijo') or None
+        porcentaje = request.form.get('porcentaje') or None
+
+        conn.execute("""
+            UPDATE conceptos_empleado
+            SET nombre=?, tipo=?, monto_fijo=?, porcentaje=?
+            WHERE id=?
+        """, (nombre, tipo, monto_fijo, porcentaje, id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('listar_conceptos_empleado', empleado_id=empleado['id']))
+
+    conn.close()
+    return render_template('admin_concepto_empleado_form.html', empleado=empleado, concepto=concepto)
+
+@app.route('/admin/conceptos_empleado/eliminar/<int:id>')
+@login_required
+@role_required('admin')
+def eliminar_concepto_empleado(id):
+    conn = get_db_connection()
+    concepto = conn.execute('SELECT * FROM conceptos_empleado WHERE id = ?', (id,)).fetchone()
+    if not concepto:
+        conn.close()
+        return "Concepto no encontrado", 404
+    empleado_id = concepto['empleado_id']
+    conn.execute('DELETE FROM conceptos_empleado WHERE id = ?', (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('listar_conceptos_empleado', empleado_id=empleado_id))
+
+# -----------------------
 # Otros roles
 # -----------------------
 @app.route('/gerente')

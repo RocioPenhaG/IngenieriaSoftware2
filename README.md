@@ -46,3 +46,10 @@ Opciones que debería tener:
 - Ver mis datos personales (solo su registro, sin modificar)
 - Consultar mis recibos (PDF o detalle en pantalla)
 - Descargar mis recibos
+
+
+
+############
+CONSULTAS:
+- Conceptos recurrentes se aplican a todos los empleados cada mes
+- Conceptos no recurrentes pueden ser agregados de forma puntual usando otra tabla (conceptos_empleado)?

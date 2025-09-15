@@ -75,6 +75,87 @@ def admin():
     return render_template('admin.html')
 
 # -----------------------
+# Gestión de Usuarios
+# -----------------------
+@app.route('/admin/usuarios')
+@login_required
+@role_required('admin')
+def listar_usuarios():
+    conn = get_db_connection()
+    usuarios = conn.execute('SELECT * FROM usuarios').fetchall()
+    conn.close()
+    return render_template('admin_usuarios.html', usuarios=usuarios)
+
+@app.route('/admin/usuarios/nuevo', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def crear_usuario():
+    if request.method == 'POST':
+        correo = request.form['correo']
+        password = request.form['password']
+        rol = request.form['rol']
+
+        conn = get_db_connection()
+        conn.execute(
+            'INSERT INTO usuarios (correo, password, rol) VALUES (?, ?, ?)',
+            (correo, password, rol)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for('listar_usuarios'))
+
+    return render_template('admin_usuarios_form.html', usuario=None)
+
+@app.route('/admin/usuarios/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def editar_usuario(id):
+    conn = get_db_connection()
+    usuario = conn.execute('SELECT * FROM usuarios WHERE id = ?', (id,)).fetchone()
+
+    if not usuario:
+        conn.close()
+        return "Usuario no encontrado", 404
+
+    if request.method == 'POST':
+        correo = request.form['correo']
+        password = request.form['password']
+        rol = request.form['rol']
+
+        conn.execute("""
+            UPDATE usuarios
+            SET correo=?, password=?, rol=?
+            WHERE id=?
+        """, (correo, password, rol, id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('listar_usuarios'))
+
+    conn.close()
+    return render_template('admin_usuarios_form.html', usuario=usuario)
+
+@app.route('/admin/usuarios/eliminar/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def eliminar_usuario(id):
+    conn = get_db_connection()
+    usuario = conn.execute('SELECT * FROM usuarios WHERE id = ?', (id,)).fetchone()
+
+    if not usuario:
+        conn.close()
+        return "Usuario no encontrado", 404
+
+    if request.method == 'POST':
+        conn.execute('DELETE FROM usuarios WHERE id = ?', (id,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('listar_usuarios'))
+
+    conn.close()
+    return render_template('admin_usuarios_eliminar.html', usuario=usuario)
+
+
+# -----------------------
 # Empleados
 # -----------------------
 @app.route('/admin/empleados')

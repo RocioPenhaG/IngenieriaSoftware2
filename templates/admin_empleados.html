@@ -35,8 +35,8 @@
                 <td>{{ e['ips'] }}</td>
                 <td>
                     <a href="{{ url_for('editar_empleado', id=e['id']) }}" class="btn btn-sm btn-warning">✏️ Editar</a>
-                    <a href="{{ url_for('eliminar_empleado', id=e['id']) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Seguro que deseas eliminar este empleado?');">🗑️ Eliminar</a>
                     <a href="{{ url_for('listar_conceptos_empleado', empleado_id=e['id']) }}" class="btn btn-sm btn-info">📄 Conceptos Puntuales</a>
+                    <a href="{{ url_for('eliminar_empleado', id=e['id']) }}" class="btn btn-sm btn-danger">🗑️ Eliminar </a>
                 </td>
             </tr>
         {% endfor %}

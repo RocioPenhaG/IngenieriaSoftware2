@@ -149,7 +149,7 @@ def editar_empleado(id):
     conn.close()
     return render_template('admin_empleados_form.html', empleado=empleado)
 
-@app.route('/admin/empleados/eliminar/<int:id>')
+""" @app.route('/admin/empleados/eliminar/<int:id>')
 @login_required
 @role_required('admin')
 def eliminar_empleado(id):
@@ -157,7 +157,26 @@ def eliminar_empleado(id):
     conn.execute("DELETE FROM empleados WHERE id = ?", (id,))
     conn.commit()
     conn.close()
-    return redirect(url_for('listar_empleados'))
+    return redirect(url_for('listar_empleados')) """
+
+@app.route('/admin/empleados/eliminar/<int:id>', methods=['GET', 'POST'])
+@login_required
+@role_required('admin')
+def eliminar_empleado(id):
+    conn = get_db_connection()
+    empleado = conn.execute("SELECT * FROM empleados WHERE id = ?", (id,)).fetchone()
+
+    if request.method == 'POST':
+        conn.execute("DELETE FROM empleados WHERE id = ?", (id,))
+        conn.commit()
+        conn.close()
+        flash('Empleado eliminado correctamente', 'success')
+        return redirect(url_for('listar_empleados'))
+
+    conn.close()
+    # GET: mostrar página de confirmación
+    return render_template('empleados_eliminar.html', empleado=empleado)
+
 
 # -----------------------
 # Conceptos Salariales

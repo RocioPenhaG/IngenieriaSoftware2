@@ -15,11 +15,26 @@
            value="{{ usuario['correo'] if usuario else '' }}">
   </div>
 
-  <div class="mb-3">
+  <!-- <div class="mb-3">
     <label>Contraseña:</label>
-    <input type="text" name="password" class="form-control" required
+    <input type="password" name="password" class="form-control" required
            value="{{ usuario['password'] if usuario else '' }}">
-  </div>
+  </div> -->
+  <div class="mb-3 position-relative">
+  <label for="password">Contraseña:</label>
+  <input type="password"
+         name="password"
+         id="password"
+         class="form-control"
+         required
+         value="{{ usuario['password'] if usuario else '' }}">
+  <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="
+    const p = document.getElementById('password');
+    p.type = p.type === 'password' ? 'text' : 'password';
+  ">
+    Mostrar/Ocultar
+  </button>
+</div>
 
   <div class="mb-3">
     <label>Rol:</label>

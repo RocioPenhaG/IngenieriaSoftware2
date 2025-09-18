@@ -31,7 +31,7 @@ def inicializar_conceptos():
             "INSERT INTO conceptos_salariales (nombre, tipo, descripcion) VALUES (?, ?, ?)",
             conceptos_iniciales
         )
-        print("Conceptos salariales iniciales insertados ✅")
+        print("Conceptos salariales iniciales insertados")
     else:
         print("Ya existen conceptos en la tabla. No se insertaron nuevos.")
 

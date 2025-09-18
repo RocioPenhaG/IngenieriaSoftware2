@@ -230,15 +230,6 @@ def editar_empleado(id):
     conn.close()
     return render_template('admin_empleados_form.html', empleado=empleado)
 
-""" @app.route('/admin/empleados/eliminar/<int:id>')
-@login_required
-@role_required('admin')
-def eliminar_empleado(id):
-    conn = get_db_connection()
-    conn.execute("DELETE FROM empleados WHERE id = ?", (id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('listar_empleados')) """
 
 @app.route('/admin/empleados/eliminar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -271,6 +262,7 @@ def listar_conceptos():
     conn.close()
     return render_template('admin_conceptos.html', conceptos=conceptos)
 
+
 @app.route('/admin/conceptos/nuevo', methods=['GET', 'POST'])
 @login_required
 @role_required('admin')
@@ -283,25 +275,35 @@ def crear_concepto():
         afecta_aguinaldo = 1 if 'afecta_aguinaldo' in request.form else 0
         monto_fijo = request.form.get('monto_fijo') or None
         porcentaje = request.form.get('porcentaje') or None
+        # ✅ monto a float o 0.0 si está vacío
+        monto = float(request.form.get('monto') or 0.0)
+        # ✅ checkbox imponible
+        imponible = 1 if 'imponible' in request.form else 0
 
         conn = get_db_connection()
         conn.execute("""
             INSERT INTO conceptos_salariales
-            (nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo, monto_fijo, porcentaje)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo, monto_fijo, porcentaje))
+            (nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo, monto_fijo, porcentaje, monto, imponible)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo,
+            monto_fijo, porcentaje, monto, imponible
+        ))
         conn.commit()
         conn.close()
         return redirect(url_for('listar_conceptos'))
 
     return render_template('admin_conceptos_form.html', concepto=None)
 
+
 @app.route('/admin/conceptos/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
 @role_required('admin')
 def editar_concepto(id):
     conn = get_db_connection()
-    concepto = conn.execute('SELECT * FROM conceptos_salariales WHERE id = ?', (id,)).fetchone()
+    concepto = conn.execute(
+        'SELECT * FROM conceptos_salariales WHERE id = ?', (id,)
+    ).fetchone()
 
     if not concepto:
         conn.close()
@@ -315,18 +317,32 @@ def editar_concepto(id):
         afecta_aguinaldo = 1 if 'afecta_aguinaldo' in request.form else 0
         monto_fijo = request.form.get('monto_fijo') or None
         porcentaje = request.form.get('porcentaje') or None
+        monto = float(request.form.get('monto') or 0.0)
+        imponible = 1 if 'imponible' in request.form else 0
 
         conn.execute("""
             UPDATE conceptos_salariales
-            SET nombre=?, tipo=?, recurrente=?, afecta_ips=?, afecta_aguinaldo=?, monto_fijo=?, porcentaje=?
-            WHERE id=?
-        """, (nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo, monto_fijo, porcentaje, id))
+            SET nombre = ?,
+                tipo = ?,
+                recurrente = ?,
+                afecta_ips = ?,
+                afecta_aguinaldo = ?,
+                monto_fijo = ?,
+                porcentaje = ?,
+                monto = ?,
+                imponible = ?
+            WHERE id = ?
+        """, (
+            nombre, tipo, recurrente, afecta_ips, afecta_aguinaldo,
+            monto_fijo, porcentaje, monto, imponible, id
+        ))
         conn.commit()
         conn.close()
         return redirect(url_for('listar_conceptos'))
 
     conn.close()
     return render_template('admin_conceptos_form.html', concepto=concepto)
+
 
 @app.route('/admin/conceptos/eliminar/<int:id>')
 @login_required
@@ -337,7 +353,6 @@ def eliminar_concepto(id):
     conn.commit()
     conn.close()
     return redirect(url_for('listar_conceptos'))
-
 
 # -----------------------
 # Conceptos puntuales por empleado

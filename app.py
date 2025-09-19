@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 import sqlite3
 
 app = Flask(__name__)
@@ -404,32 +404,51 @@ def crear_concepto_empleado(empleado_id):
 @role_required('admin')
 def editar_concepto_empleado(id):
     conn = get_db_connection()
-    concepto = conn.execute('SELECT * FROM conceptos_empleado WHERE id = ?', (id,)).fetchone()
-    if not concepto:
+    # Busco el registro a editar
+    concepto_empleado = conn.execute(
+        'SELECT * FROM conceptos_empleado WHERE id = ?', (id,)
+    ).fetchone()
+    if not concepto_empleado:
         conn.close()
         return "Concepto no encontrado", 404
 
-    empleado = conn.execute('SELECT * FROM empleados WHERE id = ?', (concepto['empleado_id'],)).fetchone()
+    # Busco el empleado para mostrar su nombre y volver a la lista
+    empleado = conn.execute(
+        'SELECT * FROM empleados WHERE id = ?',
+        (concepto_empleado['empleado_id'],)
+    ).fetchone()
+
+    # Listado de conceptos salariales para el <select>
+    conceptos = conn.execute(
+        'SELECT * FROM conceptos_salariales'
+    ).fetchall()
 
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        tipo = request.form['tipo']
+        concepto_id = request.form['concepto_id']
         monto_fijo = request.form.get('monto_fijo') or None
         porcentaje = request.form.get('porcentaje') or None
+        fecha_aplicacion = request.form['fecha_aplicacion']
 
         conn.execute("""
             UPDATE conceptos_empleado
-            SET nombre=?, tipo=?, monto_fijo=?, porcentaje=?
-            WHERE id=?
-        """, (nombre, tipo, monto_fijo, porcentaje, id))
+            SET concepto_id = ?, monto_fijo = ?, porcentaje = ?, fecha_aplicacion = ?
+            WHERE id = ?
+        """, (concepto_id, monto_fijo, porcentaje, fecha_aplicacion, id))
         conn.commit()
         conn.close()
         return redirect(url_for('listar_conceptos_empleado', empleado_id=empleado['id']))
 
     conn.close()
-    return render_template('admin_concepto_empleado_form.html', empleado=empleado, concepto=concepto)
+    # ✅ OJO: aquí paso "concepto_empleado" para que la plantilla pueda precargar los datos
+    return render_template(
+        'admin_conceptos_empleado_form.html',
+        empleado=empleado,
+        conceptos=conceptos,
+        concepto_empleado=concepto_empleado
+    )
 
-@app.route('/admin/conceptos_empleado/eliminar/<int:id>')
+
+@app.route('/admin/conceptos_empleado/eliminar/<int:id>', methods=['POST'])
 @login_required
 @role_required('admin')
 def eliminar_concepto_empleado(id):
@@ -442,8 +461,8 @@ def eliminar_concepto_empleado(id):
     conn.execute('DELETE FROM conceptos_empleado WHERE id = ?', (id,))
     conn.commit()
     conn.close()
+    flash('Concepto eliminado correctamente', 'success')
     return redirect(url_for('listar_conceptos_empleado', empleado_id=empleado_id))
-
 # -----------------------
 # Otros roles
 # -----------------------

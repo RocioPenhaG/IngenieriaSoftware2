@@ -2,68 +2,71 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Asignar Concepto a Empleado</title>
+  <title>
+    {% if concepto_empleado %}
+      Editar Concepto de Empleado
+    {% else %}
+      Asignar Concepto a Empleado
+    {% endif %}
+  </title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="container py-4">
 
-  <h1 class="mb-4">Asignar concepto a <span class="text-primary">{{ empleado.nombre }}</span></h1>
+  <h1 class="mb-4">
+    {% if concepto_empleado %}
+      Editar concepto de <span class="text-primary">{{ empleado.nombre }}</span>
+    {% else %}
+      Asignar concepto a <span class="text-primary">{{ empleado.nombre }}</span>
+    {% endif %}
+  </h1>
 
   <!-- Formulario -->
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <form method="POST">
+
+        <!-- Selección de concepto salarial -->
         <div class="mb-3">
           <label for="concepto_id" class="form-label">Concepto</label>
           <select name="concepto_id" id="concepto_id" class="form-select" required>
-            <option value="" disabled selected>-- Selecciona un concepto --</option>
-            {% for concepto in conceptos %}
-              <option value="{{ concepto['id'] }}">{{ concepto['nombre'] }} ({{ concepto['tipo'] }})</option>
+            <option value="" disabled {% if not concepto_empleado %}selected{% endif %}>
+              -- Selecciona un concepto --
+            </option>
+            {% for c in conceptos %}
+              <option value="{{ c['id'] }}"
+                {% if concepto_empleado and concepto_empleado['concepto_id'] == c['id'] %}
+                  selected
+                {% endif %}>
+                {{ c['nombre'] }} ({{ c['tipo'] }})
+              </option>
             {% endfor %}
           </select>
         </div>
 
+        <!-- Monto fijo -->
         <div class="mb-3">
-          <label for="monto" class="form-label">Monto</label>
-          <input type="number" step="0.01" name="monto" id="monto" class="form-control" placeholder="Ingrese monto" required>
+          <label for="monto_fijo" class="form-label">Monto</label>
+          <input type="number" step="0.01" name="monto_fijo" id="monto_fijo"
+                 class="form-control" placeholder="Ingrese monto" required
+                 value="{% if concepto_empleado %}{{ concepto_empleado['monto_fijo'] }}{% endif %}">
         </div>
 
+        <!-- Fecha de aplicación -->
+        <div class="mb-3">
+          <label for="fecha_aplicacion" class="form-label">Fecha de aplicación</label>
+          <input type="date" name="fecha_aplicacion" id="fecha_aplicacion"
+                 class="form-control" required
+                 value="{% if concepto_empleado %}{{ concepto_empleado['fecha_aplicacion'] }}{% endif %}">
+        </div>
+
+        <!-- Botones -->
         <button type="submit" class="btn btn-success">💾 Guardar</button>
-        <a href="{{ url_for('listar_empleados') }}" class="btn btn-secondary">⬅️ Volver</a>
+        <a href="{{ url_for('listar_conceptos_empleado', empleado_id=empleado.id) }}"
+           class="btn btn-secondary">⬅️ Volver</a>
       </form>
     </div>
   </div>
-
-  <!-- Conceptos ya asignados -->
-  <h2 class="mb-3">Conceptos asignados</h2>
-  <table class="table table-bordered table-striped">
-    <thead class="table-dark">
-      <tr>
-        <th>ID</th>
-        <th>Concepto</th>
-        <th>Tipo</th>
-        <th>Monto</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for ce in conceptos_empleado %}
-        <tr>
-          <td>{{ ce.id }}</td>
-          <td>{{ ce.concepto.nombre }}</td>
-          <td>{{ ce.concepto.tipo }}</td>
-          <td>{{ ce.monto }}</td>
-          <td>
-            <a href="{{ url_for('eliminar_concepto_empleado', id=ce.id) }}" class="btn btn-sm btn-danger">Eliminar</a>
-          </td>
-        </tr>
-      {% else %}
-        <tr>
-          <td colspan="5" class="text-center text-muted">No hay conceptos asignados todavía</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
 
 </body>
 </html>
